@@ -1688,6 +1688,39 @@ Value repairwallet(const Array& params, bool fHelp)
     return result;
 }
 
+// EnergyCoin: avoid fragmentation by setting a threshold for stake-splitting
+Value setstakesplitthreshold(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1)
+        throw runtime_error(
+            "setstakesplitthreshold [max=10000]\n"
+            "The wallet will split your PoS stakes only when the output size is higher than this threshold. Set it at your own risk. Recommended value is 250\n");
+    uint64 nStakeSplitThreshold = params[0].get_int();
+	if (pwalletMain->IsLocked())
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Unlock wallet to use this feature");
+	if (nStakeSplitThreshold > 10000)
+		return "Integer is out of range - setstakesplitthreshold failed";
+
+	CWalletDB walletdb(pwalletMain->strWalletFile);
+	LOCK(pwalletMain->cs_wallet);
+	{
+		bool fFileBacked = pwalletMain->fFileBacked;
+
+		Object result;
+		pwalletMain->nStakeSplitThreshold = nStakeSplitThreshold;
+		result.push_back(Pair("value setting to ", int(pwalletMain->nStakeSplitThreshold)));
+		if(fFileBacked)
+		{
+			walletdb.WriteStakeSplitThreshold(nStakeSplitThreshold);
+			result.push_back(Pair("Success! ", "This threshold value is saved to wallet.dat"));
+		}
+		else
+			result.push_back(Pair("Fail! ", "This threshold value is not saved"));
+
+		return result;
+	}
+}
+
 // EnergyCoin: resend unconfirmed wallet transactions
 Value resendtx(const Array& params, bool fHelp)
 {

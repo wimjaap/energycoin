@@ -1,5 +1,19 @@
+EnergyCoin integration/staging tree
+==================================
 
-EnergyCoin - ENRG
+Copyright (c) 2014-2015 EnergyCoin Developers
+
+Change Log
+---------
+
+v1.3.0.0 (Latest Version):
+- Add a new setstakesplitthreshold function on console (default 250). This can avoid fragmentation by setting a threshold for stake-splitting
+- Update checkpoint and fix the "checkpoint too old" issue
+- Fix an invalid conversion error when compiling on Windows
+- Fix a multiple definition error when compiling on Linux
+
+What is EnergyCoin (ENRG)?
+------------------------
 
 EnergyCoin is a pure PoS coin which generates coins through PoS blocks. Except the first block where it generates the initial 101 million coins, no PoW mining will get any coins. All every person has to do is post it on our facebook, twitter or reddit page, and add a signature to btctalk profile. Its easy and free!
 
@@ -21,3 +35,6 @@ Year 6 has only 1% of annual interest.
 Ports:
 P2P:	22705
 RPC:	22706
+
+Support Development by Donation: ePvnQvX5RbzDCzt3qSB5TmBz89BJMvpG46
+

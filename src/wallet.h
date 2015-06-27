@@ -93,6 +93,7 @@ public:
     typedef std::map<unsigned int, CMasterKey> MasterKeyMap;
     MasterKeyMap mapMasterKeys;
     unsigned int nMasterKeyMaxID;
+	uint64 nStakeSplitThreshold;
 
     CWallet()
     {
@@ -100,6 +101,7 @@ public:
         nWalletMaxVersion = FEATURE_BASE;
         fFileBacked = false;
         nMasterKeyMaxID = 0;
+		nStakeSplitThreshold = 250;
         pwalletdbEncryption = NULL;
         nOrderPosNext = 0;
     }
@@ -110,6 +112,7 @@ public:
         strWalletFile = strWalletFileIn;
         fFileBacked = true;
         nMasterKeyMaxID = 0;
+		nStakeSplitThreshold = 250;
         pwalletdbEncryption = NULL;
         nOrderPosNext = 0;
     }
