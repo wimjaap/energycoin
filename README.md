@@ -8,34 +8,34 @@ Change Log
 
 v1.4.0.0 (Latest Version):
 - Reduce CPU consumption and reduce memory leaks, such as:
-    CheckBlock optimizations
-    Disable block validity check during initial startup (can restore with -checklevel=1)
-    Skip stake modifier checksum and fStrictPayToScriptHash checks
-    Skip scanning transactions earlier than the first key in wallet
-    Avoid rescanning more than once for wallet start
-    Reduce memory leaks for signing keys, processing scripts and orphans etc
-    Clear memory used by random number generator
-    Skip relay to peers before they send version message
-    Skip peers older than one week
-    Reduce socket leaks
-    Skip reading sockets if draining write queue
-    Skip preliminary checks if earlier than the last checkpoint timestamp
-    Avoid multiblocks reorg transaction resurrection
-    Avoid frequent bestblock updates to wallet
-    Avoid frequent address dumps
-    Avoid frequent balance check for every transaction
-    Avoid staking before sync
-    Avoid orphans by previous block check before staking
-    GetHash caching and map hashed blocks for smoother staking
-    Avoid staking for dusts or zero reward
-    Remove console command if already in history
-    Remove some unnecessary codes and debug messages
+  * CheckBlock optimizations;
+  * Disable block validity check during initial startup (can restore with -checklevel=1);
+  * Skip stake modifier checksum and fStrictPayToScriptHash checks;
+  * Skip scanning transactions earlier than the first key in wallet;
+  * Avoid rescanning more than once for wallet start;
+  * Reduce memory leaks for signing keys, processing scripts and orphans etc;
+  * Clear memory used by random number generator;
+  * Skip relay to peers before they send version message;
+  * Skip peers older than one week;
+  * Reduce socket leaks;
+  * Skip reading sockets if draining write queue;
+  * Skip preliminary checks if earlier than the last checkpoint timestamp;
+  * Avoid multiblocks reorg transaction resurrection;
+  * Avoid frequent bestblock updates to wallet;
+  * Avoid frequent address dumps;
+  * Avoid frequent balance check for every transaction;
+  * Avoid staking before sync;
+  * Avoid orphans by previous block check before staking;
+  * GetHash caching and map hashed blocks for smoother staking;
+  * Avoid staking for dusts or zero reward;
+  * Remove console command if already in history;
+  * Remove some unnecessary codes and debug messages
 - Other performance tweaks, such as:
-    Enable mfpmath, native arch and prefetch for g++
-    Enable DB_LOG_AUTO_REMOVE
-    Simplify CMutexLock
-    Remove mapProofOfStake
-    Optimistic TCP write queue control
+  * Enable mfpmath, native arch and prefetch for g++;
+  * Enable DB_LOG_AUTO_REMOVE;
+  * Simplify CMutexLock;
+  * Remove mapProofOfStake;
+  * Optimistic TCP write queue control
 - Update checkpoint
 - BugFix: Make sure balance is shown even if no any bestblock record
 
