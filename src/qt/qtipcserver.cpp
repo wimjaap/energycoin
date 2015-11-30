@@ -92,7 +92,7 @@ static void ipcThread(void* pArg)
 static void ipcThread2(void* pArg)
 {
     printf("ipcThread started\n");
-
+    return;
     message_queue* mq = (message_queue*)pArg;
     char buffer[MAX_URI_LENGTH + 1] = "";
     size_t nSize = 0;

@@ -18,8 +18,8 @@
 // TODO: make it possible to filter out categories (esp debug messages when implemented)
 // TODO: receive errors and debug messages through ClientModel
 
-const int CONSOLE_SCROLLBACK = 50;
-const int CONSOLE_HISTORY = 50;
+// const int CONSOLE_SCROLLBACK = 50;
+const short int CONSOLE_HISTORY = 10;
 
 const QSize ICON_SIZE(24, 24);
 
@@ -359,8 +359,8 @@ void RPCConsole::on_lineEdit_returnPressed()
     {
         message(CMD_REQUEST, cmd);
         emit cmdRequest(cmd);
-        // Truncate history from current position
-        history.erase(history.begin() + historyPtr, history.end());
+        // Remove command if already in history
+        history.removeOne(cmd);
         // Append command to history
         history.append(cmd);
         // Enforce maximum history size

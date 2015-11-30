@@ -37,12 +37,9 @@ class CMutexLock
 {
 private:
     boost::unique_lock<Mutex> lock;
-public:
 
     void Enter(const char* pszName, const char* pszFile, int nLine)
     {
-        if (!lock.owns_lock())
-        {
             EnterCritical(pszName, pszFile, nLine, (void*)(lock.mutex()));
 #ifdef DEBUG_LOCKCONTENTION
             if (!lock.try_lock())
@@ -53,30 +50,18 @@ public:
 #ifdef DEBUG_LOCKCONTENTION
             }
 #endif
-        }
-    }
-
-    void Leave()
-    {
-        if (lock.owns_lock())
-        {
-            lock.unlock();
-            LeaveCritical();
-        }
     }
 
     bool TryEnter(const char* pszName, const char* pszFile, int nLine)
     {
-        if (!lock.owns_lock())
-        {
             EnterCritical(pszName, pszFile, nLine, (void*)(lock.mutex()), true);
             lock.try_lock();
             if (!lock.owns_lock())
                 LeaveCritical();
-        }
         return lock.owns_lock();
     }
 
+public:
     CMutexLock(Mutex& mutexIn, const char* pszName, const char* pszFile, int nLine, bool fTry = false) : lock(mutexIn, boost::defer_lock)
     {
         if (fTry)
@@ -94,11 +79,6 @@ public:
     operator bool()
     {
         return lock.owns_lock();
-    }
-
-    boost::unique_lock<Mutex> &GetLock()
-    {
-        return lock;
     }
 };
 

@@ -1,10 +1,12 @@
 TEMPLATE = app
 TARGET = energycoin-qt
-VERSION = 1.3.0
+VERSION = 1.4.0
 INCLUDEPATH += src src/json src/qt
 QT += network
 DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE BOOST_THREAD_PROVIDES_GENERIC_SHARED_MUTEX_ON_WIN __NO_SYSTEM_INCLUDES
 CONFIG += no_include_pwd
+CONFIG += thread
+CONFIG += static
 greaterThan(QT_MAJOR_VERSION, 4) {
      QT += widgets
      DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
@@ -127,7 +129,9 @@ contains(BENRGOIN_NEED_QT_PLUGINS, 1) {
 
 #QMAKE_CXXFLAGS += -msse2
 #QMAKE_CFLAGS += -msse2
-QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
+QMAKE_CXXFLAGS *= -msse2 -mfpmath=sse
+QMAKE_CFLAGS *= -msse2 -mfpmath=sse
+QMAKE_CXXFLAGS_WARN_ON = -O2 -march=native -fprefetch-loop-arrays -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
 
 # Input
 DEPENDPATH += src src/json src/qt
