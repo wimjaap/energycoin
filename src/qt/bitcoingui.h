@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
+#include <stdint.h>
 
 class TransactionTableModel;
 class ClientModel;
@@ -67,6 +68,7 @@ private:
     SignVerifyMessageDialog *signVerifyMessageDialog;
 
     QLabel *labelEncryptionIcon;
+    QLabel *labelStakingIcon;
     QLabel *labelConnectionsIcon;
     QLabel *labelBlocksIcon;
     QLabel *progressBarLabel;
@@ -97,6 +99,7 @@ private:
     RPCConsole *rpcConsole;
 
     QMovie *syncIconMovie;
+    uint64_t nWeight;
 
     /** Create the main UI actions. */
     void createActions();
@@ -174,6 +177,8 @@ private slots:
     void showNormalIfMinimized(bool fToggleHidden = false);
     /** simply calls showNormalIfMinimized(true) for use in SLOT() macro */
     void toggleHidden();
+    void updateWeight();
+    void updateStakingIcon();
 };
 
 #endif

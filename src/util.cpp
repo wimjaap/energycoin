@@ -28,6 +28,7 @@ namespace boost {
 #include <boost/thread.hpp>
 #include <openssl/crypto.h>
 #include <openssl/rand.h>
+#include <openssl/conf.h>
 #include <stdarg.h>
 
 #ifdef WIN32
@@ -99,11 +100,12 @@ class CInit
 public:
     CInit()
     {
-        // Init OpenSSL library multithreading support
+        // Init OpenSSL library multithreading support, but avoid config file load/race
         ppmutexOpenSSL = (CCriticalSection**)OPENSSL_malloc(CRYPTO_num_locks() * sizeof(CCriticalSection*));
         for (int i = 0; i < CRYPTO_num_locks(); i++)
             ppmutexOpenSSL[i] = new CCriticalSection();
         CRYPTO_set_locking_callback(locking_callback);
+        OPENSSL_no_config();
 
 #ifdef WIN32
         // Seed random number generator with screen scrape and other hardware sources
@@ -1264,8 +1266,8 @@ void AddTimeData(const CNetAddr& ip, int64 nTime)
     {
         int64 nMedian = vTimeOffsets.median();
         std::vector<int64> vSorted = vTimeOffsets.sorted();
-        // Only let other nodes change our time by so much
-        if (abs64(nMedian) < 70 * 60)
+        // EnergyCoin: Reduce amount that peers can adjust our time
+        if (abs64(nMedian) < 35 * 60)
         {
             nTimeOffset = nMedian;
         }

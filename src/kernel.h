@@ -6,6 +6,9 @@
 
 #include "main.h"
 
+// To decrease granularity of timestamp
+static const int STAKE_TIMESTAMP_MASK = 15;
+
 // MODIFIER_INTERVAL: time to elapse before new modifier is computed
 static const unsigned int MODIFIER_INTERVAL = 30 * 60;
 extern unsigned int nModifierInterval;
@@ -19,13 +22,13 @@ bool ComputeNextStakeModifier(const CBlockIndex* pindexPrev, uint64& nStakeModif
 
 // Check whether stake kernel meets hash target
 // Sets hashProofOfStake on success return
-bool CheckStakeKernelHash(unsigned int nBits, const CBlock& blockFrom, unsigned int nTxPrevOffset, const CTransaction& txPrev, const COutPoint& prevout, unsigned int nTimeTx, uint256& hashProofOfStake, bool fmapHBlks, bool fPrintProofOfStake=false);
+bool CheckStakeKernelHash(CBlockIndex* pindexPrev, unsigned int nBits, const CBlock& blockFrom, unsigned int nTxPrevOffset, const CTransaction& txPrev, const COutPoint& prevout, unsigned int nTimeTx, uint256& hashProofOfStake, bool fmapHBlks, bool fPrintProofOfStake=false);
 
 // Check kernel hash target and coinstake signature
 // Sets hashProofOfStake on success return
-bool CheckProofOfStake(const CTransaction& tx, unsigned int nBits, uint256& hashProofOfStake);
+bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned int nBits, uint256& hashProofOfStake);
 
 // Check whether the coinstake timestamp meets protocol
-bool CheckCoinStakeTimestamp(int64 nTimeBlock, int64 nTimeTx);
+bool CheckCoinStakeTimestamp(int nHeight, int64 nTimeBlock, int64 nTimeTx);
 
 #endif // PPCOIN_KERNEL_H

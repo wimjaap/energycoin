@@ -574,7 +574,6 @@ void ThreadFlushWalletDB(void* parg)
                     map<string, int>::iterator mi = bitdb.mapFileUseCount.find(strFile);
                     if (mi != bitdb.mapFileUseCount.end())
                     {
-                        printf("Flushing wallet.dat\n");
                         nLastFlushed = nWalletDBUpdated;
                         int64 nStart = GetTimeMillis();
 

@@ -24,11 +24,11 @@ class CAddress;
 class CInv;
 class CNode;
 
-
 static const unsigned int MAX_BLOCK_SIZE = 1000000;
 static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE/2;
 static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE/50;
-static const unsigned int MAX_ORPHAN_TRANSACTIONS = MAX_BLOCK_SIZE/100;
+static const unsigned int MAX_ORPHAN_TRANSACTIONS = MAX_BLOCK_SIZE/10000;
+static const unsigned int MAX_ORPHAN_BLOCKS_SIZE = 40;
 static const unsigned int MAX_INV_SZ = 50000;
 static const int64 MIN_TX_FEE = 1.0 * CENT;
 static const int64 MIN_RELAY_TX_FEE = 1.0 * CENT;
@@ -44,8 +44,6 @@ static const unsigned int LOCKTIME_THRESHOLD = 500000000; // Tue Nov  5 00:53:20
 static const uint256 hashGenesisBlockOfficial("0x00000a5ac2dc57cfb0b92bc8be7731fe6a94a8c1c49a0d2f32e9e2da4f7d2308");
 static const uint256 hashGenesisBlockTestNet ("0x");
 
-static const int64 nMaxClockDrift = 2 * 60 * 60;        // two hours
-
 extern CScript COINBASE_FLAGS;
 
 
@@ -56,6 +54,10 @@ extern uint256 hashGenesisBlock;
 extern CBlockIndex* pindexGenesisBlock;
 extern unsigned int nStakeMinAge;
 extern int nCoinbaseMaturity;
+extern int Start_Chain_V2;
+extern int64 Start_TIME_V2;
+extern unsigned int nStakeTargetSpacing;
+extern unsigned int nStakeTargetSpacingV2;
 extern int nBestHeight;
 extern CBigNum bnBestChainTrust;
 extern CBigNum bnBestInvalidTrust;
@@ -72,7 +74,8 @@ extern int64 nTimeBestReceived;
 extern CCriticalSection cs_setpwalletRegistered;
 extern std::set<CWallet*> setpwalletRegistered;
 extern unsigned char pchMessageStart[4];
-extern std::map<uint256, CBlock*> mapOrphanBlocks;
+struct COrphanBlock;
+extern std::map<uint256, COrphanBlock*> mapOrphanBlocks;
 extern std::map<unsigned int, unsigned int> mapHashedBlocks;
 
 // Settings
@@ -114,7 +117,7 @@ int GetNumBlocksOfPeers();
 bool IsInitialBlockDownload();
 std::string GetWarnings(std::string strFor);
 bool GetTransaction(const uint256 &hash, CTransaction &tx, uint256 &hashBlock);
-uint256 WantedByOrphan(const CBlock* pblockOrphan);
+uint256 WantedByOrphan(const COrphanBlock* pblockOrphan);
 const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfStake);
 void BitcoinMiner(CWallet *pwallet, bool fProofOfStake);
 void ResendWalletTransactions();
@@ -1358,7 +1361,7 @@ public:
 
     uint256 GetBlockHash() const
     {
-	if (fUseFastIndex && (nTime < GetAdjustedTime() - 12 * nMaxClockDrift) && blockHash != 0)
+	if (fUseFastIndex && (nTime < GetAdjustedTime() - 24 * 60 * 60) && blockHash != 0)
         return blockHash;
         CBlock block;
         block.nVersion        = nVersion;
@@ -1566,5 +1569,21 @@ public:
 };
 
 extern CTxMemPool mempool;
+
+inline unsigned int GetTargetSpacing(int nHeight)
+{
+    if (nHeight >= Start_Chain_V2)
+        return nStakeTargetSpacingV2;
+    else
+        return nStakeTargetSpacing;
+}
+
+inline int64 GetClockDrift(int64 nTime)
+{
+    if(nTime > Start_TIME_V2)
+        return nStakeTargetSpacingV2;
+    else
+        return 7200;     // nMaxClockDrift
+}
 
 #endif

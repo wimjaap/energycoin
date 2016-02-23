@@ -219,6 +219,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getaccount",             &getaccount,             false,  false },
     { "getaddressesbyaccount",  &getaddressesbyaccount,  true,   false },
     { "sendtoaddress",          &sendtoaddress,          false,  false },
+    { "sendsplit",              &sendsplit,              false,  false },
     { "getreceivedbyaddress",   &getreceivedbyaddress,   false,  false },
     { "getreceivedbyaccount",   &getreceivedbyaccount,   false,  false },
     { "listreceivedbyaddress",  &listreceivedbyaddress,  false,  false },
@@ -453,7 +454,7 @@ bool HTTPAuthorized(map<string, string>& mapHeaders)
         return false;
     string strUserPass64 = strAuth.substr(6); boost::trim(strUserPass64);
     string strUserPass = DecodeBase64(strUserPass64);
-    return strUserPass == strRPCUserColonPass;
+    return TimingResistantEqual(strUserPass, strRPCUserColonPass);
 }
 
 //
@@ -731,7 +732,7 @@ void ThreadRPCServer2(void* parg)
     printf("ThreadRPCServer started\n");
 
     strRPCUserColonPass = mapArgs["-rpcuser"] + ":" + mapArgs["-rpcpassword"];
-    if (mapArgs["-rpcpassword"] == "")
+    if ((mapArgs["-rpcpassword"] == "") || (mapArgs["-rpcuser"] == mapArgs["-rpcpassword"]))
     {
         unsigned char rand_pwd[32];
         RAND_bytes(rand_pwd, 32);
@@ -746,6 +747,7 @@ void ThreadRPCServer2(void* parg)
               "rpcuser=bitcoinrpc\n"
               "rpcpassword=%s\n"
               "(you do not need to remember this password)\n"
+              "The username and password MUST NOT be the same.\n"
               "If the file does not exist, create it with owner-readable-only file permissions.\n"),
                 strWhatAmI.c_str(),
                 GetConfigFile().string().c_str(),
@@ -966,10 +968,9 @@ void ThreadRPCServer3(void* parg)
         if (!HTTPAuthorized(mapHeaders))
         {
             printf("ThreadRPCServer incorrect password attempt from %s\n", conn->peer_address_to_string().c_str());
-            /* Deter brute-forcing short passwords.
+            /* Deter brute-forcing, but do not reveal if using short passwords
                If this results in a DOS the user really
                shouldn't have their RPC port exposed.*/
-            if (mapArgs["-rpcpassword"].size() < 20)
                 Sleep(250);
 
             conn->stream() << HTTPReply(HTTP_UNAUTHORIZED, "", false) << std::flush;
@@ -1149,6 +1150,7 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "setgenerate"            && n > 0) ConvertTo<bool>(params[0]);
     if (strMethod == "setgenerate"            && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "sendtoaddress"          && n > 1) ConvertTo<double>(params[1]);
+    if (strMethod == "sendsplit"              && n > 1) ConvertTo<Object>(params[1]);
     if (strMethod == "settxfee"               && n > 0) ConvertTo<double>(params[0]);
     if (strMethod == "getreceivedbyaddress"   && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "getreceivedbyaccount"   && n > 1) ConvertTo<boost::int64_t>(params[1]);

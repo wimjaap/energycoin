@@ -64,15 +64,12 @@ double CAddrInfo::GetChance(int64 nNow) const
     if (nSinceLastSeen < 0) nSinceLastSeen = 0;
     if (nSinceLastTry < 0) nSinceLastTry = 0;
 
-    fChance *= 600.0 / (600.0 + nSinceLastSeen);
-
     // deprioritize very recent attempts away
     if (nSinceLastTry < 60*10)
         fChance *= 0.01;
 
-    // deprioritize 50% after each failed attempt
-    for (int n=0; n<nAttempts; n++)
-        fChance /= 1.5;
+    // deprioritize 66% after each failed attempt, but capping nAttempts penalty at 8 to avoid taking too long for searches or overly penalizing outages.
+    fChance *= pow(0.66, min(nAttempts, 8));
 
     return fChance;
 }

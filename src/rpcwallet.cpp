@@ -277,6 +277,51 @@ Value getaddressesbyaccount(const Array& params, bool fHelp)
     return ret;
 }
 
+Value sendsplit(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 2)
+        throw runtime_error(
+            "sendsplit <EnergyCoinaddress> {\"count\":c,\"amount\":a}\n"
+            "send and split into multiple outputs <c> with amount <a> each [max count = 1000; min amount = 1000 ENRG]"
+            + HelpRequiringPassphrase());
+
+    CBitcoinAddress address(params[0].get_str());
+    if (!address.IsValid())
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid EnergyCoin address");
+
+    // Amount
+    int64 nAmount, nCount;
+
+    Object s = params[1].get_obj();
+    const Value& count_v = find_value(s, "count");
+    if (count_v.type() != int_type)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, count must be integer");
+
+    nCount = count_v.get_int64();
+    if (nCount <= 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, count must be larger than zero");
+
+    if (nCount > 1000)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, maximum count is 1000 to avoid too big transaction size");
+
+    nAmount = AmountFromValue(find_value(s, "amount"));
+    if (nAmount < 1000 * COIN)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, minimum split amount is 1000 ENRG to avoid wallet fragmentation");
+
+    if (nAmount < MIN_TXOUT_AMOUNT)
+        throw JSONRPCError(-101, "Send amount too small");
+
+    CWalletTx wtx;
+    if (pwalletMain->IsLocked())
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
+
+    string strError = pwalletMain->SendMoneyToDestination(address.Get(), nAmount, nCount, wtx);
+    if (strError != "")
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+
+    return wtx.GetHash().GetHex();
+}
+
 Value sendtoaddress(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 4)
@@ -305,7 +350,7 @@ Value sendtoaddress(const Array& params, bool fHelp)
     if (pwalletMain->IsLocked())
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
 
-    string strError = pwalletMain->SendMoneyToDestination(address.Get(), nAmount, wtx);
+    string strError = pwalletMain->SendMoneyToDestination(address.Get(), nAmount, 1, wtx);
     if (strError != "")
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
 
@@ -676,7 +721,7 @@ Value sendfrom(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Account has insufficient funds");
 
     // Send
-    string strError = pwalletMain->SendMoneyToDestination(address.Get(), nAmount, wtx);
+    string strError = pwalletMain->SendMoneyToDestination(address.Get(), nAmount, 1, wtx);
     if (strError != "")
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
 
@@ -1693,12 +1738,12 @@ Value setstakesplitthreshold(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw runtime_error(
-            "setstakesplitthreshold [max=10000]\n"
-            "The wallet will split your PoS stakes only when the output size is higher than this threshold. Set it at your own risk. Recommended value is 250\n");
+            "setstakesplitthreshold [max=5000; min=1000]\n"
+            "The wallet will split your PoS stakes only when the output size is higher than this threshold. Set it at your own risk. Recommended value is 1000\n");
     uint64 nStakeSplitThreshold = params[0].get_int();
 	if (pwalletMain->IsLocked())
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Unlock wallet to use this feature");
-	if (nStakeSplitThreshold > 10000)
+	if (nStakeSplitThreshold > 5000 || nStakeSplitThreshold < 1000)
 		return "Integer is out of range - setstakesplitthreshold failed";
 
 	CWalletDB walletdb(pwalletMain->strWalletFile);

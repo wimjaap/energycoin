@@ -33,6 +33,7 @@ namespace Checkpoints
         (1250001, uint256("0x4ede9ebd790c0ab947b0bb099c56a036a4404935f68daf66bfd12531c29b4da9"))
         (1660001, uint256("0x40a5440a27094081bdb7e2e58cb3034635ea823335517a2374d5bb522ee3ead0"))
         (1730001, uint256("0x5376cebee97c903c70d4895f5951527213299be44a255ed8205c431b3c2fc93e"))
+        (1970001, uint256("0x81c26391334bd6e8e69a54bd924d28cb8662daa22271aee28190d5fa5cf0f1a4"))
 		;
 
     static MapCheckpoints mapCheckpointsTestnet =
@@ -350,7 +351,7 @@ namespace Checkpoints
 }
 
 // ppcoin: sync-checkpoint master key
-const std::string CSyncCheckpoint::strMasterPubKey = "04b8d49de838594c2289037043e5330f12f4cb98f0a2f0cda90a2a957c3358c95480bb6db13fd5a50368c1f24096495eb473be801e5c919b0668a2f7acf74ed291";
+const std::string CSyncCheckpoint::strMasterPubKey = "04471f668bc62b79336750b53810f04d0358a7fc4367eeacacd887f8071ccb27f74c01251042ef03cd57206541d3698ec4c3fa10b7597c456f6df0e85fa4efa11d";
 
 std::string CSyncCheckpoint::strMasterPrivKey = "";
 
@@ -417,6 +418,5 @@ bool CSyncCheckpoint::ProcessSyncCheckpoint(CNode* pfrom)
     Checkpoints::checkpointMessage = *this;
     Checkpoints::hashPendingCheckpoint = 0;
     Checkpoints::checkpointMessagePending.SetNull();
-    printf("ProcessSyncCheckpoint: sync-checkpoint at %s\n", hashCheckpoint.ToString().c_str());
     return true;
 }

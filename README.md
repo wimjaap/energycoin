@@ -1,12 +1,48 @@
 EnergyCoin integration/staging tree
 ==================================
 
-Copyright (c) 2014-2015 EnergyCoin Developers
+Copyright (c) 2014-2016 EnergyCoin Developers
 
 Change Log
 ---------
 
-v1.4.0.0 (Latest Version):
+v1.5.0.0 (Latest Version):
+- New network protocol version 70003
+- New fork:
+  * Start at block height 2100000;
+  * New PoS minimum difficulty;
+  * New target block time;
+  * New coinstake kernel protocol;
+  * Change PoS reward to a fixed amount;
+  * No longer accepting PoW blocks
+- Security updates, such as:
+  * Avoid DoS attacks by limiting the maximum size of orphan blocks and maximum number of orphan transactions in memory;
+  * Treat non-empty coinbase in PoS blocks as DoS attempt;
+  * Treat overwriting transactions against BIP30 as DoS attempt;
+  * Avoid timedrift attacks by reducing the maximum clockdrift allowance;
+  * Reduce amount that peers can adjust our time to minimize Time-Offset attack vector;
+  * Do not bias outgoing connections towards fresh addresses (ref. Countermeasure 2 in Eclipse Attacks);
+  * Deprioritize 66% after each failed connection attempt;
+  * Avoid RPC password attacks by implementing timing-attack-resistant comparison;
+  * Do not reveal if using short RPC passwords;
+  * Do not alow PRC username and RPC password to be the same;
+  * Fix for OpenSSL handling of DER signatures;
+  * Avoid OpenSSL config file load/race
+  * Fix invalid signature with crafted length;
+  * Avoid invalid memory access on crafted signature;
+  * Disable uPNP by default;
+  * Avoid fingerprinting attacks by ignoring getaddr messages on outbound connections;
+  * No longer using the old checkpoint and alert keys
+- New allowable range of stakesplitthreshold
+- Add new command: sendsplit (allow users to split into multiple outputs easily when sending coins)
+- Add GUI indicator of PoS weight and estimated time for reward
+- Extend getmininginfo to contain staking-related information
+- Make coin selection without random shuffle for smoother staking
+- Avoid socket leaks for BindListenPort
+- Update checkpoint
+- Remove some unnecessary codes and debug messages
+
+v1.4.0.0:
 - Reduce CPU consumption and reduce memory leaks, such as:
   * CheckBlock optimizations;
   * Disable block validity check during initial startup (can restore with -checklevel=1);

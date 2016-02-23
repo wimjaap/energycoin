@@ -14,6 +14,7 @@
 #include <boost/algorithm/string.hpp>
 
 using namespace std;
+int64 nReserveBalance = 0;
 extern int nStakeMaxAge;
 
 
@@ -1046,6 +1047,32 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
     }
 }
 
+void CWallet::AvailableCoinsSimple(vector<COutput>& vCoins, unsigned int nSpendTime) const
+{
+    vCoins.clear();
+    {
+        LOCK2(cs_main, cs_wallet);
+        for (map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
+        {
+            const CWalletTx* pcoin = &(*it).second;
+
+            int nDepth = pcoin->GetDepthInMainChain();
+            if (nDepth < 1)
+                continue;
+
+            if (pcoin->nTime + nStakeMinAge > nSpendTime)
+                continue;
+
+            if (pcoin->GetBlocksToMaturity() > 0)
+                continue;
+
+            for (unsigned int i = 0; i < pcoin->vout.size(); i++)
+                if (!(pcoin->IsSpent(i)) && IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue > 0)
+                    vCoins.push_back(COutput(pcoin, i, nDepth));
+        }
+    }
+}
+
 static void ApproximateBestSubset(vector<pair<int64, pair<const CWalletTx*,unsigned int> > >vValue, int64 nTotalLower, int64 nTargetValue,
                                   vector<char>& vfBest, int64& nBest, int iterations = 1000)
 {
@@ -1237,8 +1264,43 @@ bool CWallet::SelectCoins(int64 nTargetValue, unsigned int nSpendTime, set<pair<
             SelectCoinsMinConf(nTargetValue, nSpendTime, 0, 1, vCoins, setCoinsRet, nValueRet));
 }
 
+// Select some coins without random shuffle or best subset approximation
+bool CWallet::SelectCoinsSimple(int64_t nTargetValue, unsigned int nSpendTime, set<pair<const CWalletTx*,unsigned int> >& setCoinsRet, int64_t& nValueRet) const
+{
+    vector<COutput> vCoins;
+    AvailableCoinsSimple(vCoins, nSpendTime);
 
+    setCoinsRet.clear();
+    nValueRet = 0;
 
+    BOOST_FOREACH(COutput output, vCoins)
+    {
+        const CWalletTx *pcoin = output.tx;
+        int i = output.i;
+
+        // Stop if we've chosen enough inputs
+        if (nValueRet >= nTargetValue)
+            break;
+
+        int64_t n = pcoin->vout[i].nValue;
+
+        pair<int64_t,pair<const CWalletTx*,unsigned int> > coin = make_pair(n,make_pair(pcoin, i));
+
+        if (n >= nTargetValue)
+        {
+            // If input value is greater or equal to target then simply insert it into the current subset and exit
+            setCoinsRet.insert(coin.second);
+            nValueRet += coin.first;
+            break;
+        }
+        else if (n < nTargetValue + CENT)
+        {
+            setCoinsRet.insert(coin.second);
+            nValueRet += coin.first;
+        }
+    }
+    return true;
+}
 
 bool CWallet::CreateTransaction(const vector<pair<CScript, int64> >& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, int64& nFeeRet, const CCoinControl* coinControl)
 {
@@ -1374,11 +1436,59 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64> >& vecSend, CW
     return true;
 }
 
-bool CWallet::CreateTransaction(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew, CReserveKey& reservekey, int64& nFeeRet, const CCoinControl* coinControl)
+bool CWallet::CreateTransaction(CScript scriptPubKey, int64 nValue, int64 nCount, CWalletTx& wtxNew, CReserveKey& reservekey, int64& nFeeRet, const CCoinControl* coinControl)
 {
     vector< pair<CScript, int64> > vecSend;
-    vecSend.push_back(make_pair(scriptPubKey, nValue));
+    while (nCount--)
+        vecSend.push_back(make_pair(scriptPubKey, nValue));
     return CreateTransaction(vecSend, wtxNew, reservekey, nFeeRet, coinControl);
+}
+
+bool CWallet::GetStakeWeight(uint64_t& nWeight)
+{
+    int64_t nBalance = GetBalance();
+
+    if (nBalance <= nReserveBalance)
+        return false;
+
+    vector<const CWalletTx*> vwtxPrev;
+
+    set<pair<const CWalletTx*,unsigned int> > setCoins;
+    int64_t nValueIn = 0;
+
+    if (!SelectCoinsSimple(nBalance - nReserveBalance, GetTime(), setCoins, nValueIn))
+        return false;
+
+    if (setCoins.empty())
+        return false;
+
+    nWeight = 0;
+    int64_t nCurrentTime = GetTime();
+    CTxDB txdb("r");
+
+    LOCK2(cs_main, cs_wallet);
+    BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins)
+    {
+        CTxIndex txindex;
+        if (!txdb.ReadTxIndex(pcoin.first->GetHash(), txindex))
+            continue;
+
+      if ((nBestHeight+1) >= Start_Chain_V2)
+      {
+       if (nCurrentTime - pcoin.first->nTime > nStakeMinAge)
+           nWeight += pcoin.first->vout[pcoin.second].nValue;
+      }
+      else
+      {
+        int64_t nTimeWeight =  min(nCurrentTime - (int64_t)pcoin.first->nTime, (int64_t)nStakeMaxAge) - nStakeMinAge;
+        CBigNum bnCoinDayWeight = CBigNum(pcoin.first->vout[pcoin.second].nValue) * nTimeWeight / COIN / (24 * 60 * 60);
+
+        // Weight is greater than zero
+        if (nTimeWeight > 0)
+            nWeight += bnCoinDayWeight.getuint64();
+      }
+    }
+    return true;
 }
 
 // ppcoin: create coin stake transaction
@@ -1403,7 +1513,6 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     txNew.vout.push_back(CTxOut(0, scriptEmpty));
     // Choose coins to use
     int64 nBalance = GetBalance();
-    int64 nReserveBalance = 0;
     if (mapArgs.count("-reservebalance") && !ParseMoney(mapArgs["-reservebalance"], nReserveBalance))
         return error("CreateCoinStake : invalid reserve balance amount");
     if (nBalance <= nReserveBalance)
@@ -1412,7 +1521,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     set<pair<const CWalletTx*,unsigned int> > setCoins;
     vector<const CWalletTx*> vwtxPrev;
     int64 nValueIn = 0;
-    if (!SelectCoins(nBalance - nReserveBalance, txNew.nTime, setCoins, nValueIn))
+    if (!SelectCoinsSimple(nBalance - nReserveBalance, txNew.nTime, setCoins, nValueIn))
         return false;
 
     if (setCoins.empty())
@@ -1454,7 +1563,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
             // Search nSearchInterval seconds back up to nMaxStakeSearchInterval
             uint256 hashProofOfStake = 0;
             COutPoint prevoutStake = COutPoint(pcoin.first->pfhash, pcoin.second);
-            if (CheckStakeKernelHash(nBits, block, txindex.pos.nTxPos - txindex.pos.nBlockPos, *pcoin.first, prevoutStake, txNew.nTime - n, hashProofOfStake, true))
+            if (CheckStakeKernelHash(pindexPrev, nBits, block, txindex.pos.nTxPos - txindex.pos.nBlockPos, *pcoin.first, prevoutStake, txNew.nTime - n, hashProofOfStake, true))
             {
                // Found a kernel
                 if (fDebug && GetBoolArg("-printcoinstake"))
@@ -1501,7 +1610,16 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 
                 vwtxPrev.push_back(pcoin.first);
                 txNew.vout.push_back(CTxOut(0, scriptPubKeyOut));
-				uint64 nTxCalSize = pcoin.first->vout[pcoin.second].nValue * (1+((txNew.nTime - block.GetBlockTime()) / (60*60*24)) * (0.08/365));
+
+                uint64 nTxCalSize;
+                if ((nBestHeight+1) >= Start_Chain_V2)
+                     nTxCalSize = pcoin.first->vout[pcoin.second].nValue + 5 * COIN;
+                else
+                     nTxCalSize = pcoin.first->vout[pcoin.second].nValue * (1+((txNew.nTime - block.GetBlockTime()) / (60*60*24)) * (0.08/365));
+
+                if (nStakeSplitThreshold < 1000)    nStakeSplitThreshold = 1000;
+                if (nStakeSplitThreshold > 5000)    nStakeSplitThreshold = 5000;
+
                 if (nTxCalSize / 2 > nStakeSplitThreshold * COIN)
                     txNew.vout.push_back(CTxOut(0, scriptPubKeyOut)); //split stake
 
@@ -1551,11 +1669,11 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     {
         uint64 nCoinAge;
         CTxDB txdb("r");
-		const CBlockIndex* pIndex0 = GetLastBlockIndex(pindexBest, false);
+		const CBlockIndex* pIndex0 = pindexBest;
 
         if (!txNew.GetCoinAge(txdb, nCoinAge))
             return error("CreateCoinStake : failed to calculate coin age");
-        int64 nReward = GetProofOfStakeReward(nCoinAge, nBits, txNew.nTime, pIndex0->nHeight);
+        int64 nReward = GetProofOfStakeReward(nCoinAge, nBits, txNew.nTime, pIndex0->nHeight+1);
         if (nReward < 200000)      // Avoid staking for dusts or zero reward
             return false;
         nCredit += nReward;
@@ -1657,7 +1775,7 @@ bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey)
 
 
 
-string CWallet::SendMoney(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew, bool fAskFee)
+string CWallet::SendMoney(CScript scriptPubKey, int64 nValue, int64 nCount, CWalletTx& wtxNew, bool fAskFee)
 {
     CReserveKey reservekey(this);
     int64 nFeeRequired;
@@ -1674,10 +1792,10 @@ string CWallet::SendMoney(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew,
         printf("SendMoney() : %s", strError.c_str());
         return strError;
     }
-    if (!CreateTransaction(scriptPubKey, nValue, wtxNew, reservekey, nFeeRequired))
+    if (!CreateTransaction(scriptPubKey, nValue, nCount, wtxNew, reservekey, nFeeRequired))
     {
         string strError;
-        if (nValue + nFeeRequired > GetBalance())
+        if (nValue * nCount + nFeeRequired > GetBalance())
             strError = strprintf(_("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds  "), FormatMoney(nFeeRequired).c_str());
         else
             strError = _("Error: Transaction creation failed  ");
@@ -1696,19 +1814,22 @@ string CWallet::SendMoney(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew,
 
 
 
-string CWallet::SendMoneyToDestination(const CTxDestination& address, int64 nValue, CWalletTx& wtxNew, bool fAskFee)
+string CWallet::SendMoneyToDestination(const CTxDestination& address, int64 nValue, int64 nCount, CWalletTx& wtxNew, bool fAskFee)
 {
     // Check amount
     if (nValue <= 0)
         return _("Invalid amount");
-    if (nValue + nTransactionFee > GetBalance())
+    // Check count
+    if (nCount <= 0)
+        return _("Invalid count");
+    if (nValue * nCount + nTransactionFee > GetBalance())
         return _("Insufficient funds");
 
     // Parse Bitcoin address
     CScript scriptPubKey;
     scriptPubKey.SetDestination(address);
 
-    return SendMoney(scriptPubKey, nValue, wtxNew, fAskFee);
+    return SendMoney(scriptPubKey, nValue, nCount, wtxNew, fAskFee);
 }
 
 

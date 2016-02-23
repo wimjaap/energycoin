@@ -1,6 +1,6 @@
 TEMPLATE = app
 TARGET = energycoin-qt
-VERSION = 1.4.0
+VERSION = 1.5.0
 INCLUDEPATH += src src/json src/qt
 QT += network
 DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE BOOST_THREAD_PROVIDES_GENERIC_SHARED_MUTEX_ON_WIN __NO_SYSTEM_INCLUDES
@@ -73,23 +73,18 @@ contains(USE_QRCODE, 1) {
     LIBS += -lqrencode
 }
 
-# use: qmake "USE_UPNP=1" ( enabled by default; default)
-#  or: qmake "USE_UPNP=0" (disabled by default)
-#  or: qmake "USE_UPNP=-" (not supported)
+# use: qmake "USE_UPNP=1" (enabled)
+#  or: qmake "USE_UPNP=-" (disabled; default)
 # miniupnpc (http://miniupnp.free.fr/files/) must be installed for support
-contains(USE_UPNP, -) {
-    message(Building without UPNP support)
-} else {
+contains(USE_UPNP, 1) {
     message(Building with UPNP support)
-    count(USE_UPNP, 0) {
-        USE_UPNP=1
-    }
     DEFINES += USE_UPNP=$$USE_UPNP STATICLIB
     INCLUDEPATH += $$MINIUPNPC_INCLUDE_PATH
     LIBS += $$join(MINIUPNPC_LIB_PATH,,-L,) -lminiupnpc
     win32:LIBS += -liphlpapi
+} else {
+    message(Building without UPNP support)
 }
-
 
 # use: qmake "USE_DBUS=1"
 contains(USE_DBUS, 1) {

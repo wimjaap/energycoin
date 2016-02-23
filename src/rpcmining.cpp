@@ -66,20 +66,39 @@ Value getmininginfo(const Array& params, bool fHelp)
     if (fHelp || params.size() != 0)
         throw runtime_error(
             "getmininginfo\n"
-            "Returns an object containing mining-related information.");
+            "Returns objects containing staking/mining-related information.");
 
-    Object obj;
-    obj.push_back(Pair("blocks",        (int)nBestHeight));
-    obj.push_back(Pair("currentblocksize",(uint64_t)nLastBlockSize));
-    obj.push_back(Pair("currentblocktx",(uint64_t)nLastBlockTx));
-    obj.push_back(Pair("difficulty",    (double)GetDifficulty()));
-    obj.push_back(Pair("errors",        GetWarnings("statusbar")));
-    obj.push_back(Pair("generate",      GetBoolArg("-gen")));
-    obj.push_back(Pair("genproclimit",  (int)GetArg("-genproclimit", -1)));
-    obj.push_back(Pair("hashespersec",  gethashespersec(params, false)));
-	obj.push_back(Pair("networkhashps", getnetworkhashps(params, false)));
-    obj.push_back(Pair("pooledtx",      (uint64_t)mempool.size()));
-    obj.push_back(Pair("testnet",       fTestNet));
+    uint64_t nWeight = 0;
+    pwalletMain->GetStakeWeight(nWeight);
+
+    double nNetworkWeight = GetPoSKernelPS();
+    if ((nBestHeight+1) >= Start_Chain_V2)
+    {
+            nWeight /= COIN;
+            nNetworkWeight /= COIN;
+    }
+    bool staking = nLastCoinStakeSearchInterval && nWeight;
+    int nExpectedTime = staking ? (GetTargetSpacing(nBestHeight) * nNetworkWeight / (double)nWeight) : -1;
+
+    Object obj, PoS, PoW;
+    obj.push_back(Pair("blocks",           (int)nBestHeight));
+    obj.push_back(Pair("testnet",          fTestNet));
+    obj.push_back(Pair("errors",           GetWarnings("statusbar")));
+    obj.push_back(Pair("currentblocksize", (uint64_t)nLastBlockSize));
+    obj.push_back(Pair("currentblocktx",   (uint64_t)nLastBlockTx));
+    obj.push_back(Pair("pooledtx",         (uint64_t)mempool.size()));
+    PoS.push_back(Pair("staking",          staking));
+    PoS.push_back(Pair("weight",           (double)nWeight));
+    PoS.push_back(Pair("difficulty",       GetDifficulty(GetLastBlockIndex(pindexBest, true))));
+    PoS.push_back(Pair("netstakeweight",   nNetworkWeight));
+    PoS.push_back(Pair("expectedtime",     nExpectedTime));
+    obj.push_back(Pair("proof-of-stake",   PoS));
+    PoW.push_back(Pair("generate",         GetBoolArg("-gen")));
+    PoW.push_back(Pair("genproclimit",     (int)GetArg("-genproclimit", -1)));
+    PoW.push_back(Pair("hashespersec",     gethashespersec(params, false)));
+    PoW.push_back(Pair("difficulty",       (double)GetDifficulty()));
+    PoW.push_back(Pair("networkhashps",    getnetworkhashps(params, false)));
+    obj.push_back(Pair("proof-of-work",    PoW));
     return obj;
 }
 
