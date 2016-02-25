@@ -366,13 +366,13 @@ static bool CheckStakeKernelHashV2(CBlockIndex* pindexPrev, unsigned int nBits, 
     bnTarget.SetCompact(nBits);
 
     // Weighted target
-    int64_t nValueIn = txPrev.vout[prevout.n].nValue;
+    int64 nValueIn = txPrev.vout[prevout.n].nValue;
     CBigNum bnWeight = CBigNum(nValueIn);
     bnTarget *= bnWeight;
 
-    uint64_t nStakeModifier = pindexPrev->nStakeModifier;
+    uint64 nStakeModifier = pindexPrev->nStakeModifier;
     int nStakeModifierHeight = pindexPrev->nHeight;
-    int64_t nStakeModifierTime = pindexPrev->nTime;
+    int64 nStakeModifierTime = pindexPrev->nTime;
 
     // Calculate hash
     CDataStream ss(SER_GETHASH, 0);

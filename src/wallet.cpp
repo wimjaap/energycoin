@@ -1265,7 +1265,7 @@ bool CWallet::SelectCoins(int64 nTargetValue, unsigned int nSpendTime, set<pair<
 }
 
 // Select some coins without random shuffle or best subset approximation
-bool CWallet::SelectCoinsSimple(int64_t nTargetValue, unsigned int nSpendTime, set<pair<const CWalletTx*,unsigned int> >& setCoinsRet, int64_t& nValueRet) const
+bool CWallet::SelectCoinsSimple(int64 nTargetValue, unsigned int nSpendTime, set<pair<const CWalletTx*,unsigned int> >& setCoinsRet, int64& nValueRet) const
 {
     vector<COutput> vCoins;
     AvailableCoinsSimple(vCoins, nSpendTime);
@@ -1282,9 +1282,9 @@ bool CWallet::SelectCoinsSimple(int64_t nTargetValue, unsigned int nSpendTime, s
         if (nValueRet >= nTargetValue)
             break;
 
-        int64_t n = pcoin->vout[i].nValue;
+        int64 n = pcoin->vout[i].nValue;
 
-        pair<int64_t,pair<const CWalletTx*,unsigned int> > coin = make_pair(n,make_pair(pcoin, i));
+        pair<int64,pair<const CWalletTx*,unsigned int> > coin = make_pair(n,make_pair(pcoin, i));
 
         if (n >= nTargetValue)
         {
@@ -1444,9 +1444,9 @@ bool CWallet::CreateTransaction(CScript scriptPubKey, int64 nValue, int64 nCount
     return CreateTransaction(vecSend, wtxNew, reservekey, nFeeRet, coinControl);
 }
 
-bool CWallet::GetStakeWeight(uint64_t& nWeight)
+bool CWallet::GetStakeWeight(uint64& nWeight)
 {
-    int64_t nBalance = GetBalance();
+    int64 nBalance = GetBalance();
 
     if (nBalance <= nReserveBalance)
         return false;
@@ -1454,7 +1454,7 @@ bool CWallet::GetStakeWeight(uint64_t& nWeight)
     vector<const CWalletTx*> vwtxPrev;
 
     set<pair<const CWalletTx*,unsigned int> > setCoins;
-    int64_t nValueIn = 0;
+    int64 nValueIn = 0;
 
     if (!SelectCoinsSimple(nBalance - nReserveBalance, GetTime(), setCoins, nValueIn))
         return false;
@@ -1463,7 +1463,7 @@ bool CWallet::GetStakeWeight(uint64_t& nWeight)
         return false;
 
     nWeight = 0;
-    int64_t nCurrentTime = GetTime();
+    int64 nCurrentTime = GetTime();
     CTxDB txdb("r");
 
     LOCK2(cs_main, cs_wallet);
@@ -1480,7 +1480,7 @@ bool CWallet::GetStakeWeight(uint64_t& nWeight)
       }
       else
       {
-        int64_t nTimeWeight =  min(nCurrentTime - (int64_t)pcoin.first->nTime, (int64_t)nStakeMaxAge) - nStakeMinAge;
+        int64 nTimeWeight =  min(nCurrentTime - (int64)pcoin.first->nTime, (int64)nStakeMaxAge) - nStakeMinAge;
         CBigNum bnCoinDayWeight = CBigNum(pcoin.first->vout[pcoin.second].nValue) * nTimeWeight / COIN / (24 * 60 * 60);
 
         // Weight is greater than zero

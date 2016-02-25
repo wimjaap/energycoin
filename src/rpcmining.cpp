@@ -68,7 +68,7 @@ Value getmininginfo(const Array& params, bool fHelp)
             "getmininginfo\n"
             "Returns objects containing staking/mining-related information.");
 
-    uint64_t nWeight = 0;
+    uint64 nWeight = 0;
     pwalletMain->GetStakeWeight(nWeight);
 
     double nNetworkWeight = GetPoSKernelPS();
