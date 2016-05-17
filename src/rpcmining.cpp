@@ -11,43 +11,6 @@
 using namespace json_spirit;
 using namespace std;
 
-Value getgenerate(const Array& params, bool fHelp)
-{
-    if (fHelp || params.size() != 0)
-        throw runtime_error(
-            "getgenerate\n"
-            "Returns true or false.");
-
-    return GetBoolArg("-gen");
-}
-
-
-Value setgenerate(const Array& params, bool fHelp)
-{
-    if (fHelp || params.size() < 1 || params.size() > 2)
-        throw runtime_error(
-            "setgenerate <generate> [genproclimit]\n"
-            "<generate> is true or false to turn generation on or off.\n"
-            "Generation is limited to [genproclimit] processors, -1 is unlimited.");
-
-    bool fGenerate = true;
-    if (params.size() > 0)
-        fGenerate = params[0].get_bool();
-
-    if (params.size() > 1)
-    {
-        int nGenProcLimit = params[1].get_int();
-        mapArgs["-genproclimit"] = itostr(nGenProcLimit);
-        if (nGenProcLimit == 0)
-            fGenerate = false;
-    }
-    mapArgs["-gen"] = (fGenerate ? "1" : "0");
-
-    GenerateBitcoins(fGenerate, pwalletMain);
-    return Value::null;
-}
-
-
 Value gethashespersec(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 0)
@@ -93,7 +56,6 @@ Value getmininginfo(const Array& params, bool fHelp)
     PoS.push_back(Pair("netstakeweight",   nNetworkWeight));
     PoS.push_back(Pair("expectedtime",     nExpectedTime));
     obj.push_back(Pair("proof-of-stake",   PoS));
-    PoW.push_back(Pair("generate",         GetBoolArg("-gen")));
     PoW.push_back(Pair("genproclimit",     (int)GetArg("-genproclimit", -1)));
     PoW.push_back(Pair("hashespersec",     gethashespersec(params, false)));
     PoW.push_back(Pair("difficulty",       (double)GetDifficulty()));

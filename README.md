@@ -5,8 +5,17 @@ Copyright (c) 2014-2016 EnergyCoin Developers
 
 Change Log
 ---------
+v1.5.1.0 (Latest Version):
+- Add "Unlock for minting only" option in GUI
+- BugFix: Proper use of custom change address in CoinControl
+- BugFix: Matching transaction inputs with selected coins in CoinControl
+- Ban peers with old protocol version
+- Update checkpoints
+- Update coin spec in README.md
+- Remove PoW miner.
+- Remove some more unnecessary codes and simplify some debug messages
 
-v1.5.0.0 (Latest Version):
+v1.5.0.0 (Mandatory Update):
 - New network protocol version 70003
 - New fork:
   * Start at block height 2100000;
@@ -88,7 +97,7 @@ EnergyCoin is a pure PoS coin which generates coins through PoS blocks. Except t
 
 After distribution is over energycoin is  mineable by simply running your wallet. Thus a huge mining cost of hardware and millions of electricity costs are saved.
 
-EnergyCoin also adopts a variable PoS rate with the following annual interest rate:
+Before block height 2.1m, EnergyCoin adopted a variable PoS rate with the following annual interest rate:
 Year-1: 10%
 Year-2: 8%
 Year-3: 6%
@@ -96,7 +105,9 @@ Year-4: 4%
 Year-5: 2%
 Year 6 has only 1% of annual interest.
 
--30 seconds block time to make sure network is stable and fast at the same time
+After block height 2.1m, EnergyCoin adopts a fixed PoS block reward of 5 ENRG.
+
+-150 seconds target block time.
 -Difficulty retarget is based on each block ensures to keep the difficulty logical
 -Scarce but not too scarce to be uninteresting or not usable. 101 million coins in distribution and interest values were decided to make sure the coin retains its value
 

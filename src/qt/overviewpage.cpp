@@ -16,6 +16,8 @@
 #define DECORATION_SIZE 64
 #define NUM_ITEMS 6
 
+extern bool fWalletUnlockMintOnly;
+
 class TxViewDelegate : public QAbstractItemDelegate
 {
     Q_OBJECT
@@ -152,7 +154,7 @@ void OverviewPage::unlockWallet()
 {
     if(model->getEncryptionStatus() == WalletModel::Locked)
     {
-        AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
+        AskPassphraseDialog dlg(AskPassphraseDialog::UnlockMinting, this);
         dlg.setModel(model);
         if(dlg.exec() == QDialog::Accepted)
         {
@@ -163,6 +165,7 @@ void OverviewPage::unlockWallet()
     {
         model->setWalletLocked(true);
         ui->unlockWalletButton->setText(QString("Unlock Wallet"));
+        fWalletUnlockMintOnly = false;
     }
 }
 
