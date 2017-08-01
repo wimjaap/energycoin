@@ -37,7 +37,7 @@ const std::string CLIENT_NAME("EnergyCoin");
 #define GIT_ARCHIVE 1
 #ifdef GIT_ARCHIVE
 #    define GIT_COMMIT_ID ""
-#    define GIT_COMMIT_DATE "Ari 26,2014 23:00"
+#    define GIT_COMMIT_DATE "Jul 21,2017 20:00"
 #endif
 
 #define BUILD_DESC_FROM_COMMIT(maj,min,rev,build,commit) \

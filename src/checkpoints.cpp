@@ -7,7 +7,7 @@
 
 #include "checkpoints.h"
 
-#include "db.h"
+#include "txdb.h"
 #include "main.h"
 #include "uint256.h"
 
@@ -37,6 +37,8 @@ namespace Checkpoints
         (2100001, uint256("0x4b1829923fd46ea1617b5777460a6fe0bb9cd312e18600ddd9d10d58fde2338b"))
         (2110001, uint256("0xfe8c8553843ce83cfeceb0bacd2d04adc69b92f66c1356e4d1fc2cc485e92f69"))
         (2127001, uint256("0xaf7dd84528e04f3a1dc02e1b8be3c610d70211fb524478a35e5f06e7426dda82"))
+        (2352001, uint256("0xc2acc79a32b84fc9da8b76ee7f3ba227c2891aeb48dadaeb782fa82c0f6fedd4"))
+        (2366001, uint256("0xa111e2bb4627464ebfc7055dd05c9d13dfd06ceda1018801aa02483285bff14f"))
 		;
 
     static MapCheckpoints mapCheckpointsTestnet =
@@ -147,7 +149,6 @@ namespace Checkpoints
         }
         if (!txdb.TxnCommit())
             return error("WriteSyncCheckpoint(): failed to commit to db sync checkpoint %s", hashCheckpoint.ToString().c_str());
-        txdb.Close();
 
         Checkpoints::hashSyncCheckpoint = hashCheckpoint;
         return true;
@@ -178,7 +179,6 @@ namespace Checkpoints
                     return error("AcceptPendingSyncCheckpoint: SetBestChain failed for sync checkpoint %s", hashPendingCheckpoint.ToString().c_str());
                 }
             }
-            txdb.Close();
 
             if (!WriteSyncCheckpoint(hashPendingCheckpoint))
                 return error("AcceptPendingSyncCheckpoint(): failed to write sync checkpoint %s", hashPendingCheckpoint.ToString().c_str());
@@ -269,7 +269,6 @@ namespace Checkpoints
             {
                 return error("ResetSyncCheckpoint: SetBestChain failed for hardened checkpoint %s", hash.ToString().c_str());
             }
-            txdb.Close();
         }
         else if(!mapBlockIndex.count(hash))
         {
@@ -414,7 +413,6 @@ bool CSyncCheckpoint::ProcessSyncCheckpoint(CNode* pfrom)
             return error("ProcessSyncCheckpoint: SetBestChain failed for sync checkpoint %s", hashCheckpoint.ToString().c_str());
         }
     }
-    txdb.Close();
 
     if (!Checkpoints::WriteSyncCheckpoint(hashCheckpoint))
         return error("ProcessSyncCheckpoint(): failed to write sync checkpoint %s", hashCheckpoint.ToString().c_str());

@@ -14,9 +14,14 @@
 #include "keystore.h"
 #include "bignum.h"
 
+// Maximum script length in bytes
+static const int MAX_SCRIPT_SIZE = 10000;
+
 typedef std::vector<unsigned char> valtype;
 
 class CTransaction;
+
+static const unsigned int MAX_SCRIPT_ELEMENT_SIZE = 520; // bytes
 
 /** Signature hash types/flags */
 enum
@@ -36,6 +41,7 @@ enum txnouttype
     TX_PUBKEYHASH,
     TX_SCRIPTHASH,
     TX_MULTISIG,
+    TX_NULL_DATA,
 };
 
 class CNoDestination {
@@ -211,25 +217,6 @@ inline std::string ValueString(const std::vector<unsigned char>& vch)
     else
         return HexStr(vch);
 }
-
-inline std::string StackString(const std::vector<std::vector<unsigned char> >& vStack)
-{
-    std::string str;
-    BOOST_FOREACH(const std::vector<unsigned char>& vch, vStack)
-    {
-        if (!str.empty())
-            str += " ";
-        str += ValueString(vch);
-    }
-    return str;
-}
-
-
-
-
-
-
-
 
 /** Serialized script, used inside transaction inputs and outputs */
 class CScript : public std::vector<unsigned char>
@@ -523,9 +510,8 @@ public:
     bool IsPayToScriptHash() const;
 
     // Called by CTransaction::IsStandard
-    bool IsPushOnly() const
+    bool IsPushOnly(const_iterator pc) const
     {
-        const_iterator pc = begin();
         while (pc < end())
         {
             opcodetype opcode;
@@ -537,6 +523,15 @@ public:
         return true;
     }
 
+    bool IsPushOnly() const
+    {
+        return this->IsPushOnly(begin());
+    }
+
+    bool IsUnspendable() const
+    {
+        return (size() > 0 && *begin() == OP_RETURN) || (size() > MAX_SCRIPT_SIZE);
+    }
 
     void SetDestination(const CTxDestination& address);
     void SetMultisig(int nRequired, const std::vector<CKey>& keys);
@@ -581,8 +576,7 @@ public:
 
 bool EvalScript(std::vector<std::vector<unsigned char> >& stack, const CScript& script, const CTransaction& txTo, unsigned int nIn, int nHashType);
 bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet);
-int ScriptSigArgsExpected(txnouttype t, const std::vector<std::vector<unsigned char> >& vSolutions);
-bool IsStandard(const CScript& scriptPubKey);
+bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType);
 bool IsMine(const CKeyStore& keystore, const CScript& scriptPubKey);
 bool IsMine(const CKeyStore& keystore, const CTxDestination &dest);
 void ExtractAffectedKeys(const CKeyStore &keystore, const CScript& scriptPubKey, std::vector<CKeyID> &vKeys);

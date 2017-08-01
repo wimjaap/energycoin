@@ -1,11 +1,33 @@
 EnergyCoin integration/staging tree
 ==================================
 
-Copyright (c) 2014-2016 EnergyCoin Developers
+Copyright (c) 2014-2017 EnergyCoin Developers
 
 Change Log
 ---------
-v1.5.1.0 (Latest Version):
+v1.6.0.0 (Mandatory Update):
+- New network protocol version 70004
+- New fork:
+  * Start at block height 2390000
+  * Add support for Energyparty op_return transactions
+  * Reduce standard transaction fee to 0.001 ENRG per kbyte
+  * Add soft fork logic: define confirmation window and 95% rule
+- Migration to LevelDB for transaction index database files
+- Add transaction index database version 60117
+- Add a startup option (-splitblkfiles) to enable splitting blk0001.dat into files of maximum 500 MB each.
+- Add a startup option (-disabledebuglog) to disable debug.log
+- Fix checking redeemScript size when adding multisig address
+- Fix signrawtransaction and sendrawtransaction RPC calls to support multisig redeem scripts
+- Fix error in showing scriptPubKey
+- Warn users if loading multisig addresses with too-long redeemScripts that can never be redeemed
+- Show redeem script in validateaddress RPC call
+- Increase the standard transaction txin threshold to allow a maximum of 15-of-15 P2SH multisig
+- Treat blocks with old nVersion as DoS attempt
+- New design of EnergyCoin logo
+- Update checkpoints
+- Remove some unnecessary codes and trim some debug messages
+
+v1.5.1.0:
 - Add "Unlock for minting only" option in GUI
 - BugFix: Proper use of custom change address in CoinControl
 - BugFix: Matching transaction inputs with selected coins in CoinControl

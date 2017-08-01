@@ -189,7 +189,6 @@ bool ATTR_WARN_PRINTF(1,2) error(const char *format, ...);
 
 void PrintException(std::exception* pex, const char* pszThread);
 void PrintExceptionContinue(std::exception* pex, const char* pszThread);
-void ParseString(const std::string& str, char c, std::vector<std::string>& v);
 std::string FormatMoney(int64 n, bool fPlus=false);
 bool ParseMoney(const std::string& str, int64& nRet);
 bool ParseMoney(const char* pszIn, int64& nRet);
@@ -344,14 +343,6 @@ static const std::string strTimestampFormat = "%Y-%m-%d %H:%M:%S UTC";
 inline std::string DateTimeStrFormat(int64 nTime)
 {
     return DateTimeStrFormat(strTimestampFormat.c_str(), nTime);
-}
-
-
-template<typename T>
-void skipspaces(T& it)
-{
-    while (isspace(*it))
-        ++it;
 }
 
 inline bool IsSwitchChar(char c)
