@@ -1,10 +1,14 @@
 EnergyCoin integration/staging tree
 ==================================
 
-Copyright (c) 2014-2017 EnergyCoin Developers
+Copyright (c) 2014-2020 EnergyCoin Developers
 
 Change Log
 ---------
+v1.6.1.0:
+- Add VOut parameter in listsinceblock and gettransaction RPC methods
+- Update checkpoints
+
 v1.6.0.0 (Mandatory Update):
 - New network protocol version 70004
 - New fork:

@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
-// Copyright (c) 2015-2017 The EnergyCoin Developers
+// Copyright (c) 2015-2020 The EnergyCoin Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #ifndef BENRGOIN_WALLET_H
@@ -38,6 +38,12 @@ enum WalletFeature
     FEATURE_LATEST = 60000
 };
 
+struct COutputEntry
+{
+    CTxDestination destination;
+    int64 amount;
+    int vout;
+};
 
 /** A key pool entry */
 class CKeyPool
@@ -627,8 +633,8 @@ public:
         return nChangeCached;
     }
 
-    void GetAmounts(std::list<std::pair<CTxDestination, int64> >& listReceived,
-                    std::list<std::pair<CTxDestination, int64> >& listSent, int64& nFee, std::string& strSentAccount) const;
+    void GetAmounts(std::list<COutputEntry>& listReceived,
+                    std::list<COutputEntry>& listSent, int64& nFee, std::string& strSentAccount) const;
 
     void GetAccountAmounts(const std::string& strAccount, int64& nReceived,
                            int64& nSent, int64& nFee) const;
