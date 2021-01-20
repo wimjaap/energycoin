@@ -46,15 +46,15 @@ static const int64 CENT = 10000;
 #define UINTBEGIN(a)        ((uint32_t*)&(a))
 #define CUINTBEGIN(a)        ((const uint32_t*)&(a))
 
-#ifndef PRI64d
+#ifndef  PRI64d 
 #if defined(_MSC_VER) || defined(__MSVCRT__)
-#define PRI64d  "I64d"
-#define PRI64u  "I64u"
-#define PRI64x  "I64x"
+#define  PRI64d   "I64d"
+#define  PRI64u   "I64u"
+#define  PRI64x   "I64x"
 #else
-#define PRI64d  "lld"
-#define PRI64u  "llu"
-#define PRI64x  "llx"
+#define  PRI64d   "lld"
+#define  PRI64u   "llu"
+#define  PRI64x   "llx"
 #endif
 #endif
 
@@ -74,18 +74,18 @@ void LogStackTrace();
      http://msdn.microsoft.com/en-us/library/tcxf1dw6%28v=vs.100%29.aspx
    */
   #define PRIszx    "Ix"
-  #define PRIszu    "Iu"
+  #define  PRIszu     "Iu"
   #define PRIszd    "Id"
   #define PRIpdx    "Ix"
   #define PRIpdu    "Iu"
-  #define PRIpdd    "Id"
+  #define  PRIpdd     "Id"
 #else /* C99 standard */
   #define PRIszx    "zx"
-  #define PRIszu    "zu"
+  #define  PRIszu     "zu"
   #define PRIszd    "zd"
   #define PRIpdx    "tx"
   #define PRIpdu    "tu"
-  #define PRIpdd    "td"
+  #define  PRIpdd     "td"
 #endif
 
 // This is needed because the foreach macro can't get over the comma in pair<t1, t2>
@@ -241,7 +241,7 @@ void runCommand(std::string strCommand);
 
 inline std::string i64tostr(int64 n)
 {
-    return strprintf("%"PRI64d, n);
+    return strprintf("%" PRI64d , n);
 }
 
 inline std::string itostr(int n)

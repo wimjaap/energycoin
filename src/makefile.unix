@@ -172,6 +172,10 @@ obj/%.o: %.cpp
 energycoind: $(OBJS:obj/%=obj/%)
 	$(LINK) $(xCXXFLAGS) -o $@ $^ $(xLDFLAGS) $(LIBS)
 
+install: energycoind
+	install -d $(DESTDIR)/usr/bin
+	install -m 755 energycoind $(DESTDIR)/usr/bin/energycoind
+
 TESTOBJS := $(patsubst test/%.cpp,obj-test/%.o,$(wildcard test/*.cpp))
 
 obj-test/%.o: test/%.cpp

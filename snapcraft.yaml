@@ -1,0 +1,60 @@
+name: energycoind
+version: "1.6.1"
+summary: EnergyCoin Daemon
+description: |
+  EnergyCoin is a Peer to Peer cryptocurrency 
+  based on the disruptive Bitcoin technology.
+  Transactions in EnergyCoin run on the
+  Proof of Stake protocol. 
+
+base: core18
+confinement: devmode
+
+parts:
+  energycoind:
+    plugin: make
+    makefile: makefile.unix
+    make-parameters: ['USE_UPNP=0']
+    source-type: git
+    source: https://github.com/wimjaap/energycoin
+    source-subdir: src
+    build-packages:
+      - build-essential
+      - libdb++-dev
+      - libssl1.0-dev
+      - libminiupnpc-dev
+      - zlib1g-dev
+      - libboost-system1.65-dev
+      - libboost-filesystem1.65-dev
+      - libboost-chrono1.65-dev
+      - libboost-program-options1.65-dev
+      - libboost-test1.65-dev
+      - libboost-thread1.65-dev
+      - git
+    stage-packages:
+      - libdb5.3++
+      - libssl1.0.0
+      - miniupnpc
+      - libboost-system1.65.1
+      - libboost-filesystem1.65.1
+      - libboost-chrono1.65.1
+      - libboost-program-options1.65.1
+      - libboost-test1.65.1
+      - libboost-thread1.65.1
+  energycoind-bootstrap:
+    plugin: dump
+    source-type: git
+    source: https://github.com/wimjaap/energycoin
+    source-subdir: bootstrap
+    stage-packages:
+      - curl
+      - wget
+      - p7zip-full
+    organize:
+      energycoind-bootstrap.sh: usr/bin/energycoind-bootstrap
+
+apps:
+  energycoind:
+    command: energycoind
+  energycoind-bootstrap:
+    command: energycoind-bootstrap
