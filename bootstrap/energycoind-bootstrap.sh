@@ -27,7 +27,8 @@ echo "Downloading bootstrap, please wait and grab a coffee.."
 wget -q -O ${ENERGYCOIN_DIR}/tmp/EnergyCoinBlkChain.7z https://www.dropbox.com/sh/sg2vwy96arh98jv/AAAuluGDjwkIy2SIWQ_WJX9Qa/EnergyCoinBlkChain.7z?dl=1
 echo "Extracting blockchain and moving to correct location."
 cd ${ENERGYCOIN_DIR}/tmp
-dtrx EnergyCoinBlkChain.7z > /dev/null
+dtrx EnergyCoinBlkChain.7z
+ls -al
 mv -t ${ENERGYCOIN_DIR} ${ENERGYCOIN_DIR}/tmp/EnergyCoin/database ${ENERGYCOIN_DIR}/tmp/EnergyCoin/txleveldb ${ENERGYCOIN_DIR}/tmp/EnergyCoin/blk*
 rm -r ${ENERGYCOIN_DIR}/tmp
 fi
