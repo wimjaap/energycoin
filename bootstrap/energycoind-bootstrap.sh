@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ENERGYCOIN_DIR=~/.EnergyCoin
-ENERGYCOIN_CONF=${ENERGYCOIN_DIR}/energycoin.conf
+ENERGYCOIN_CONF=${ENERGYCOIN_DIR}/EnergyCoin.conf
 NODELIST=$(curl -s "https://chainz.cryptoid.info/explorer/peers.nodes.dws?coin=enrg&subver=/EnergyCoin:1.6.1/" | sed -e 's/[[]\|[]]\|["]/''/g' | tr , '\n' | while read line; do echo addnode="$line"; done;)
 BLOCKCHAIN=${ENERGYCOIN_DIR}/blk0001.dat
 

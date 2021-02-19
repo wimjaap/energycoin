@@ -7,7 +7,7 @@ description: |
   Transactions in EnergyCoin run on the
   Proof of Stake protocol. 
 base: core18
-confinement: devmode
+confinement: strict
 parts:
   energycoind:
     plugin: make
