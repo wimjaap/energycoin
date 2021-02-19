@@ -57,8 +57,6 @@ apps:
     command: energycoind
     daemon: simple
     restart-condition: always
-    before:
-      - bootstrap
     plugs:
       - network
       - network-bind
