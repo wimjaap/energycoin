@@ -6,10 +6,8 @@ description: |
   based on the disruptive Bitcoin technology.
   Transactions in EnergyCoin run on the
   Proof of Stake protocol. 
-
 base: core18
 confinement: devmode
-
 parts:
   energycoind:
     plugin: make
@@ -49,12 +47,13 @@ parts:
     stage-packages:
       - curl
       - wget
-      - p7zip-full
+      - tar
+      - gzip
     organize:
       energycoind-bootstrap.sh: usr/bin/energycoind-bootstrap
 
 apps:
   energycoind:
     command: energycoind
-  energycoind-bootstrap:
+  bootstrap:
     command: energycoind-bootstrap
