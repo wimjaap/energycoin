@@ -55,5 +55,10 @@ parts:
 apps:
   energycoind:
     command: energycoind
+    plugs:
+      - network
+      - network-bind
   bootstrap:
     command: energycoind-bootstrap
+    plugs:
+      - network
