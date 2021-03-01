@@ -54,9 +54,12 @@ parts:
 
 apps:
   energycoind:
+    command: energycoind --daemon
+    plugs:
+      - network
+      - network-bind
+  client:
     command: energycoind
-#    daemon: simple
-#    restart-condition: always
     plugs:
       - network
       - network-bind

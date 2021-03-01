@@ -11,12 +11,14 @@ echo "No config found, initializing config"
 mkdir -p ${ENERGYCOIN_DIR}
 cat >${ENERGYCOIN_CONF} <<EOF
 server=1
-rpcuser=${ENRG_RPCUSER:-stk}
+rpcuser=${ENRG_RPCUSER:-enrg}
 rpcpassword=${ENRG_RPCPASSWORD:-youshouldchangeme}
 rpcallowip=${ENRG_RPCALLOWIP:-127.0.0.1}
 disablewallet=${ENRG_DISABLEWALLET:-0}
 staking=${ENRG_STAKING:-1}
 txindex=${ENRG_TXINDEX:-1}
+splitblkfiles=1
+disabledebuglog=1
 ${NODELIST}
 EOF
 fi
