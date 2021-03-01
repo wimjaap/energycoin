@@ -26,7 +26,7 @@ fi
 if [ ! -f "${BLOCKCHAIN}" ]; then
 mkdir -p ${ENERGYCOIN_DIR}/tmp
 echo "Downloading bootstrap, please wait and grab a coffee.."
-wget -q -O ${ENERGYCOIN_DIR}/tmp/EnergyCoinBlkChain.tgz https://www.wimjaap.nl/EnergyCoinBlkChain.tgz
+curl -o ${ENERGYCOIN_DIR}/tmp/EnergyCoinBlkChain.tgz https://www.wimjaap.nl/EnergyCoinBlkChain.tgz
 echo "Extracting blockchain and moving to correct location."
 cd ${ENERGYCOIN_DIR}/tmp
 tar xzf EnergyCoinBlkChain.tgz

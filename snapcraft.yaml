@@ -46,7 +46,6 @@ parts:
     source-subdir: bootstrap
     stage-packages:
       - curl
-      - wget
       - tar
       - gzip
     organize:
