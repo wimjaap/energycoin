@@ -1,5 +1,7 @@
 TEMPLATE = app
 TARGET = energycoin-qt
+target.path = /usr/local/bin/
+INSTALLS += target
 VERSION = 1.6.1
 INCLUDEPATH += src src/json src/qt
 QT += network
