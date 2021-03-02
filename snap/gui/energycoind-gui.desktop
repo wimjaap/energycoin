@@ -1,0 +1,13 @@
+# http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-1.0.html
+[Desktop Entry]
+Type=Application
+Version=1.6.1
+Encoding=UTF-8
+Name=Energycoin
+Icon=${SNAP}/EnergyCoin-128.png
+MimeType=x-scheme-handler/energycoin;
+Exec=energycoind.gui %u
+Terminal=false
+Categories=Office;Finance;
+Comment=Energycoin P2P Cryptocurrency
+Keywords=internet;energycoin;
