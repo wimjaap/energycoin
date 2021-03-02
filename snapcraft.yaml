@@ -45,6 +45,46 @@ parts:
       - libboost-program-options1.65.1
       - libboost-test1.65.1
       - libboost-thread1.65.1
+  energycoin-qt:
+    plugin: qmake
+    project-files:
+      - energycoin-qt.pro
+    source-type: git
+    source: https://github.com/wimjaap/energycoin
+    build-packages:
+      - build-essential
+      - libdb++-dev
+      - libssl1.0-dev
+      - libminiupnpc-dev
+      - zlib1g-dev
+      - libboost-system1.65-dev
+      - libboost-filesystem1.65-dev
+      - libboost-chrono1.65-dev
+      - libboost-program-options1.65-dev
+      - libboost-test1.65-dev
+      - libboost-thread1.65-dev
+      - libqt5gui5
+      - libqt5core5a
+      - libqt5dbus5
+      - qttools5-dev
+      - qttools5-dev-tools
+      - git
+    stage-packages:
+      - libdb5.3++
+      - libssl1.0.0
+      - miniupnpc
+      - libboost-system1.65.1
+      - libboost-filesystem1.65.1
+      - libboost-chrono1.65.1
+      - libboost-program-options1.65.1
+      - libboost-test1.65.1
+      - libboost-thread1.65.1
+      - libqt5gui5
+      - libqt5core5a
+      - libqt5dbus5
+      - libqt5widgets5
+      - libqt5x11extras5
+      - libxcb-xinerama0
   energycoind-bootstrap:
     plugin: dump
     source-type: git
@@ -68,6 +108,14 @@ apps:
     plugs:
       - network
       - network-bind
+  gui:
+    command: energycoin-qt
+    plugs:
+      - network
+      - network-bind
+      - unity7
+    extensions:
+      - kde-neon
   bootstrap:
     command: energycoind-bootstrap
     plugs:

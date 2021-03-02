@@ -8,15 +8,21 @@ BLOCKCHAIN=${ENERGYCOIN_DIR}/blk0001.dat
 # If config doesn't exist, initialize with defaults for a full node
 if [ ! -e "${ENERGYCOIN_CONF}" ]; then
 echo "No config found, initializing config"
+echo "RPC username:"
+read ENRG_RPCUSER
+echo "RPC password:"
+read ENRG_RPCPASSWORD
+echo "Allowed RPC ip (usually 127.0.0.1):"
+read ENRG_RPCALLOWIP
 mkdir -p ${ENERGYCOIN_DIR}
 cat >${ENERGYCOIN_CONF} <<EOF
 server=1
 rpcuser=${ENRG_RPCUSER:-enrg}
 rpcpassword=${ENRG_RPCPASSWORD:-youshouldchangeme}
 rpcallowip=${ENRG_RPCALLOWIP:-127.0.0.1}
-disablewallet=${ENRG_DISABLEWALLET:-0}
-staking=${ENRG_STAKING:-1}
-txindex=${ENRG_TXINDEX:-1}
+disablewallet=0
+staking=1
+txindex=1
 splitblkfiles=1
 disabledebuglog=1
 ${NODELIST}
