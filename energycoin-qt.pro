@@ -148,7 +148,7 @@ QMAKE_CLEAN += $$PWD/src/leveldb/libleveldb.a; cd $$PWD/src/leveldb ; $(MAKE) cl
 #QMAKE_CFLAGS += -msse2
 QMAKE_CXXFLAGS *= -msse2 -mfpmath=sse
 QMAKE_CFLAGS *= -msse2 -mfpmath=sse
-QMAKE_CXXFLAGS_WARN_ON = -O2 -march=native -fprefetch-loop-arrays -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
+QMAKE_CXXFLAGS_WARN_ON = -O2 -fprefetch-loop-arrays -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
 
 # Input
 DEPENDPATH += src src/json src/qt
