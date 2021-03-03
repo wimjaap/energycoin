@@ -109,7 +109,7 @@ apps:
       - network
       - network-bind
   gui:
-    command: energycoin-qt
+    command: desktop-launch $SNAP/usr/local/bin/energycoin-qt
     plugs:
       - network
       - network-bind
